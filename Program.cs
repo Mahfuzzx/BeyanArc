@@ -13,11 +13,15 @@ string[] files = Directory.GetFiles(sourcePath, "*.pdf");
 foreach (string file in files)
 {
     BFile bFile = new(Path.GetFileName(file));
-    var destPath = (bFile.type == "TAX" ? taxPath : sgkPath) + bFile.destPath;
-    var destFile = $"{destPath}\\{bFile.destFileName}.PDF";
-    moveFile(file, destFile);
-    Console.WriteLine($"{file} dosyası");
-    Console.WriteLine($"{destFile} hedefine taşındı.");
+    Console.Write($"{file} dosyası");
+    if (bFile.type == "UNKNOWN") Console.WriteLine(" tanımsız.");
+    else
+    {
+        var destPath = (bFile.type == "TAX" ? taxPath : sgkPath) + bFile.destPath;
+        var destFile = $"{destPath}\\{bFile.destFileName}.pdf";
+        moveFile(file, destFile);
+        Console.WriteLine($"\n{destFile} hedefine taşındı.");
+    }
 }
 
 static void moveFile(string sourceFile, string destFile)
@@ -48,10 +52,10 @@ static string addSlash(string path)
 
 class BFile
 {
-    public readonly string destPath;
-    public readonly string destFileName;
+    public readonly string? destPath;
+    public readonly string? destFileName;
     public readonly string type;
-    private readonly string customerName;
+    private readonly string? customerName;
     private readonly int beginYear;
     private readonly int beginMonth;
     private readonly int endYear;
@@ -60,56 +64,65 @@ class BFile
     private readonly string? subDivName;
     private readonly string? periodString;
     private readonly string? sgkType;
-    private readonly string fileType;
+    private readonly string? fileType;
     private readonly string[] months = ["OCAK", "SUBAT", "MART", "NISAN", "MAYIS", "HAZIRAN",
                                         "TEMMUZ", "AGUSTOS", "EYLUL", "EKIM", "KASIM", "ARALIK"];
 
     public BFile(string file)
     {
-        string[] parts = file.Split('_');
-        type = parts[2].Length > 9 ? "TAX" : "SGK";
-        if (type == "TAX")
+        try
         {
-            customerName = filterChars(parts[0]);
-            string[] periods = parts[5].Split('-');
-            beginYear = int.Parse(periods[0][4..]);
-            beginMonth = int.Parse(periods[0].Substring(2, 2));
-            endYear = int.Parse(periods[1][4..]);
-            endMonth = int.Parse(periods[1].Substring(2, 2));
-            taxType = parts[3];
-            destPath = $"{customerName}\\{endYear}\\{taxType}";
-            destFileName = $"{parts[3]}";
-        }
-        else
-        {
-            customerName = filterChars(parts[0], true);
-            beginYear = int.Parse(parts[2][..4]);
-            beginMonth = int.Parse(parts[2].Substring(4, 2));
-            endYear = beginYear;
-            endMonth = beginMonth;
-            subDivName = parts[1];
-            destPath = $"{endYear}\\{customerName}\\{subDivName}";
-            sgkType = parts[5][2..] switch
+            string[] parts = file.Split('_');
+            if (parts.Length != 8) throw new Exception();
+            type = parts[2].Length > 9 ? "TAX" : "SGK";
+            if (type == "TAX")
             {
-                "I" => "IPTAL",
-                "E" => "EK",
-                "A" => "ASIL",
+                customerName = filterChars(parts[0]);
+                string[] periods = parts[5].Split('-');
+                beginYear = int.Parse(periods[0][4..]);
+                beginMonth = int.Parse(periods[0].Substring(2, 2));
+                endYear = int.Parse(periods[1][4..]);
+                endMonth = int.Parse(periods[1].Substring(2, 2));
+                taxType = parts[3];
+                destPath = $"{customerName}\\{endYear}\\{taxType}";
+                destFileName = $"{parts[3]}";
+            }
+            else
+            {
+                customerName = filterChars(parts[0], true);
+                beginYear = int.Parse(parts[2][..4]);
+                beginMonth = int.Parse(parts[2].Substring(4, 2));
+                endYear = beginYear;
+                endMonth = beginMonth;
+                subDivName = parts[1];
+                destPath = $"{endYear}\\{customerName}\\{subDivName}";
+                sgkType = parts[5][2..] switch
+                {
+                    "A" => "ASIL",
+                    _ => "UNKNOWN",
+                };
+                if (sgkType == "UNKNOWN") throw new Exception();
+                destFileName = $"{parts[5][..2]}_{parts[4]}_{sgkType}";
+            }
+            fileType = parts[6] switch
+            {
+                "THK" => "TAHAKKUK",
+                "BYN" => "BEYANNAME",
+                "HZM" => "HIZMET_LISTESI",
                 _ => "UNKNOWN",
             };
-            destFileName = $"{parts[5][..2]}_{parts[4]}_{sgkType}";
+            if (fileType == "UNKNOWN") throw new Exception();
+            periodString = calcPeriod(beginMonth, endMonth) + "_" + (endMonth == beginMonth ? months[endMonth - 1] : "DONEM");
+            destFileName = $"{periodString}_{destFileName}_{fileType}";
         }
-        fileType = parts[6] switch
+        catch (Exception)
         {
-            "THK" => "TAHAKKUK",
-            "BYN" => "BEYANNAME",
-            "HZM" => "HIZMET_LISTESI",
-            _ => "UNKNOWN",
-        };
-        periodString = calcDonem(beginMonth, endMonth) + "_" + (endMonth == beginMonth ? months[endMonth - 1] : "DONEM");
-        destFileName = $"{periodString}_{destFileName}_{fileType}";
+            type = "UNKNOWN";
+            return;
+        }
     }
 
-    private static string calcDonem(int beginMonth, int endMonth)
+    private static string calcPeriod(int beginMonth, int endMonth)
     {
         return (endMonth / (endMonth - beginMonth + 1)).ToString().PadLeft(2, '0');
     }
