@@ -3,14 +3,14 @@ using System.Text.Json;
 
 Settings settings = new();
 
-if (args.Length == 1 && args[0] == "-s") LoadSettings();
+if (args.Length == 1 && args[0].Equals("-s", StringComparison.CurrentCultureIgnoreCase)) LoadSettings();
 else if (args.Length < 3)
 {
     Console.WriteLine("Kullanım: BeyanArc.exe [-s] [Kaynak VergiHedef SGKHedef]");
     Environment.Exit(1);
 }
 
-if (args[0] == "-s")
+if (args[0].Equals("-s", StringComparison.CurrentCultureIgnoreCase))
 {
     settings.sourcePath = args[1];
     settings.taxPath = addSlash(args[2]);
