@@ -40,7 +40,12 @@ foreach (string file in files)
     }
 }
 
-static void moveFile(string sourceFile, string destFile)
+/// <summary>
+/// Moves a file from the source location to the destination, creating directories if necessary.
+/// </summary>
+/// <param name="sourceFile">The source file path.</param>
+/// <param name="destFile">The destination file path.</param>
+void moveFile(string sourceFile, string destFile)
 {
     try
     {
@@ -59,11 +64,19 @@ static void moveFile(string sourceFile, string destFile)
     }
 }
 
-static string addSlash(string path)
+/// <summary>
+/// Adds a trailing slash to the path if it doesn't already have one.
+/// </summary>
+/// <param name="path">The file or directory path to process.</param>
+/// <returns>The path with a trailing backslash.</returns>
+string addSlash(string path)
 {
     return path[^1..] != "\\" ? path + "\\" : path;
 }
 
+/// <summary>
+/// Loads settings from the 'settings.json' file or creates a new Settings instance.
+/// </summary>
 void LoadSettings()
 {
     var settingsFile = "settings.json";
@@ -76,11 +89,18 @@ void LoadSettings()
     }
 }
 
+/// <summary>
+/// Saves the current settings to the 'settings.json' file.
+/// </summary>
 void SaveSettings()
 {
     var jsonString = JsonSerializer.Serialize(settings);
     File.WriteAllText("settings.json", jsonString);
 }
+
+/// <summary>
+/// Class to hold the paths for the source, tax, and SGK directories
+/// </summary>
 class Settings
 {
     public Settings()
@@ -90,15 +110,36 @@ class Settings
         this.sgkPath = "";
     }
 
+    /// <summary>
+    /// Path to the source directory containing the PDF files.
+    /// </summary>
     public string sourcePath { get; set; }
+    /// <summary>
+    /// Path to the directory where tax files will be moved.
+    /// </summary>
     public string taxPath { get; set; }
+    /// <summary>
+    /// Path to the directory where SGK files will be moved.
+    /// </summary>
     public string sgkPath { get; set; }
 }
 
+/// <summary>
+/// Class to represent and parse information from a PDF file name
+/// </summary>
 class BFile
 {
+    /// <summary>
+    /// Destination path based on file type and content
+    /// </summary>
     public readonly string? destPath;
+    /// <summary>
+    /// Generated file name after processing
+    /// </summary>
     public readonly string? destFileName;
+    /// <summary>
+    /// Type of the file, either "TAX" or "SGK"
+    /// </summary>
     public readonly string type;
     private readonly string? customerName;
     private readonly int beginYear;
@@ -113,6 +154,10 @@ class BFile
     private readonly string[] months = ["OCAK", "SUBAT", "MART", "NISAN", "MAYIS", "HAZIRAN",
                                         "TEMMUZ", "AGUSTOS", "EYLUL", "EKIM", "KASIM", "ARALIK"];
 
+    /// <summary>
+    /// Constructor that processes and extracts metadata from the given file name.
+    /// </summary>
+    /// <param name="file">The PDF file name to process.</param>
     public BFile(string file)
     {
         try
@@ -167,24 +212,40 @@ class BFile
         }
     }
 
+    /// <summary>
+    /// Calculates the period string based on the start and end month.
+    /// </summary>
+    /// <param name="beginMonth">The beginning month of the period.</param>
+    /// <param name="endMonth">The ending month of the period.</param>
+    /// <returns>A string representing the period, padded with zeros if needed.</returns>
     private static string calcPeriod(int beginMonth, int endMonth)
     {
         return (endMonth / (endMonth - beginMonth + 1)).ToString().PadLeft(2, '0');
     }
 
+    /// <summary>
+    /// Replaces special characters (Turkish letters) in the given string.
+    /// </summary>
+    /// <param name="srcString">The source string to filter.</param>
+    /// <param name="onlySpace">Whether to replace only spaces with underscores.</param>
+    /// <returns>A string with filtered characters.</returns>
     private static string filterChars(string srcString, bool onlySpace = false)
     {
-        char[] ochars = [' ', 'Ğ', 'Ü', 'Ş', 'İ', 'Ö', 'Ç'];
-        char[] nchars = ['_', 'G', 'U', 'S', '_', 'O', 'C'];
-        string output = srcString;
-        if (onlySpace) output = output.Replace(' ', '_');
-        else
+        Dictionary<char, char> charMap = new()
+    {
+        { ' ', '_' }, { 'Ğ', 'G' }, { 'Ü', 'U' }, { 'Ş', 'S' },
+        { 'İ', '_' }, { 'Ö', 'O' }, { 'Ç', 'C' }
+    };
+
+        if (onlySpace)
         {
-            for (int i = 0; i < ochars.Length; i++)
-            {
-                output = output.Replace(ochars[i], nchars[i]);
-            }
+            return srcString.Replace(' ', '_');
         }
-        return output;
+
+        foreach (var pair in charMap)
+        {
+            srcString = srcString.Replace(pair.Key, pair.Value);
+        }
+        return srcString;
     }
 }
