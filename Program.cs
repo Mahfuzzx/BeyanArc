@@ -1,14 +1,30 @@
-﻿if (args.Length < 3)
+﻿
+using System.Text.Json;
+
+Settings settings = new();
+
+if (args.Length == 1 && args[0] == "-s") LoadSettings();
+else if (args.Length < 3)
 {
-    Console.WriteLine("Kullanım: BeyanArc.exe Kaynak VergiHedef SGKHedef");
+    Console.WriteLine("Kullanım: BeyanArc.exe [-s] [Kaynak VergiHedef SGKHedef]");
     Environment.Exit(1);
 }
 
-var sourcePath = args[0];
-var taxPath = addSlash(args[1]);
-var sgkPath = addSlash(args[2]);
+if (args[0] == "-s")
+{
+    settings.sourcePath = args[1];
+    settings.taxPath = addSlash(args[2]);
+    settings.sgkPath = addSlash(args[3]);
+    SaveSettings();
+}
+else
+{
+    settings.sourcePath = args[0];
+    settings.taxPath = addSlash(args[1]);
+    settings.sgkPath = addSlash(args[2]);
+}
 
-string[] files = Directory.GetFiles(sourcePath, "*.pdf");
+string[] files = Directory.GetFiles(settings.sourcePath, "*.pdf");
 
 foreach (string file in files)
 {
@@ -17,7 +33,7 @@ foreach (string file in files)
     if (bFile.type == "UNKNOWN") Console.WriteLine(" tanımsız.");
     else
     {
-        var destPath = (bFile.type == "TAX" ? taxPath : sgkPath) + bFile.destPath;
+        var destPath = (bFile.type == "TAX" ? settings.taxPath : settings.sgkPath) + bFile.destPath;
         var destFile = $"{destPath}\\{bFile.destFileName}.pdf";
         moveFile(file, destFile);
         Console.WriteLine($"\n{destFile} hedefine taşındı.");
@@ -28,16 +44,13 @@ static void moveFile(string sourceFile, string destFile)
 {
     try
     {
-        // Extract the destination directory path
         string destDir = Path.GetDirectoryName(destFile) ?? "";
 
         if (!Directory.Exists(destDir))
         {
-            // This will create the entire directory structure if necessary
             Directory.CreateDirectory(destDir);
         }
 
-        // Now move the file
         File.Move(sourceFile, destFile);
     }
     catch (Exception ex)
@@ -45,9 +58,41 @@ static void moveFile(string sourceFile, string destFile)
         Console.WriteLine($"Error: {ex.Message}");
     }
 }
+
 static string addSlash(string path)
 {
     return path[^1..] != "\\" ? path + "\\" : path;
+}
+
+void LoadSettings()
+{
+    var settingsFile = "settings.json";
+
+    if (!File.Exists(settingsFile)) settings = new();
+    else
+    {
+        var jsonString = File.ReadAllText(settingsFile);
+        settings = JsonSerializer.Deserialize<Settings>(jsonString) ?? new();
+    }
+}
+
+void SaveSettings()
+{
+    var jsonString = JsonSerializer.Serialize(settings);
+    File.WriteAllText("settings.json", jsonString);
+}
+class Settings
+{
+    public Settings()
+    {
+        this.sourcePath = "";
+        this.taxPath = "";
+        this.sgkPath = "";
+    }
+
+    public string sourcePath { get; set; }
+    public string taxPath { get; set; }
+    public string sgkPath { get; set; }
 }
 
 class BFile
