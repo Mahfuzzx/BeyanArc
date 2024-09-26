@@ -189,6 +189,8 @@ class BFile
                 sgkType = parts[5][2..] switch
                 {
                     "A" => "ASIL",
+                    "E" => "EK",
+                    "I" => "IPTAL",
                     _ => "UNKNOWN",
                 };
                 if (sgkType == "UNKNOWN") throw new Exception();

@@ -2,7 +2,7 @@
   "profiles": {
     "BeyanArc": {
       "commandName": "Project",
-      "commandLineArgs": "-s C:\\TEMP\\BYN_ARC\\SRC C:\\TEMP\\BYN_ARC\\DST\\LUCA C:\\TEMP\\BYN_ARC\\DST\\SGK"
+      "commandLineArgs": "-s D:\\INDIRILEN \\\\Halil1\\BEYANNAMELER\\LUCA \\\\Halil1\\BEYANNAMELER\\SGK"
     }
   }
 }
