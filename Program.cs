@@ -3,7 +3,7 @@ using System.Text.Json;
 
 Settings settings = new();
 
-if (args.Length == 1 && args[0].Equals("-s", StringComparison.CurrentCultureIgnoreCase)) LoadSettings();
+if (args.Length == 1 && args.Contains("-s")) LoadSettings();
 else if (args.Length < 3)
 {
     Console.WriteLine("Kullanım: BeyanArc.exe [-s] [Kaynak VergiHedef SGKHedef]");
@@ -103,25 +103,18 @@ void SaveSettings()
 /// </summary>
 class Settings
 {
-    public Settings()
-    {
-        this.sourcePath = "";
-        this.taxPath = "";
-        this.sgkPath = "";
-    }
-
     /// <summary>
     /// Path to the source directory containing the PDF files.
     /// </summary>
-    public string sourcePath { get; set; }
+    public string sourcePath { get; set; } = "";
     /// <summary>
     /// Path to the directory where tax files will be moved.
     /// </summary>
-    public string taxPath { get; set; }
+    public string taxPath { get; set; } = "";
     /// <summary>
     /// Path to the directory where SGK files will be moved.
     /// </summary>
-    public string sgkPath { get; set; }
+    public string sgkPath { get; set; } = "";
 }
 
 /// <summary>
