@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 Settings settings = new();
 
@@ -119,6 +120,48 @@ class Settings
     public bool keepBoth { get; set; } = false;
 }
 
+partial class DataExtractor
+{
+    [GeneratedRegex("/(\\w+)\\s*\\((.*?)\\)", RegexOptions.Singleline)]
+    private static partial Regex MyRegex();
+
+    public static Dictionary<string, string> extractFields(string data)
+    {
+        var result = new Dictionary<string, string>();
+
+        var match = MyRegex().Match(data);
+
+        while (match.Success)
+        {
+            var fieldName = match.Groups[1].Value;
+            var fieldValue = match.Groups[2].Value;
+            result[fieldName] = fieldValue;
+            match = match.NextMatch();
+        }
+
+        return result;
+    }
+}
+
+class PdfMetadataReader
+{
+    public Dictionary<string, string> metaData;
+
+    public PdfMetadataReader(string filePath)
+    {
+        using var reader = new BinaryReader(File.Open(filePath, FileMode.Open));
+        string fileContent = readAllText(reader);
+        metaData = DataExtractor.extractFields(fileContent);
+    }
+
+    private static string readAllText(BinaryReader reader)
+    {
+        using var memoryStream = new MemoryStream();
+        reader.BaseStream.CopyTo(memoryStream);
+        return System.Text.Encoding.UTF8.GetString(memoryStream.ToArray());
+    }
+}
+
 /// <summary>
 /// Class to represent and parse information from a PDF file name
 /// </summary>
@@ -150,7 +193,7 @@ class BFile
     private readonly string? fileType;
     private readonly string[] months = ["OCAK", "SUBAT", "MART", "NISAN", "MAYIS", "HAZIRAN",
                                         "TEMMUZ", "AGUSTOS", "EYLUL", "EKIM", "KASIM", "ARALIK"];
-    private readonly BeyanArc.Pure.PdfMetadataReader? purePdfMetadataReader;
+    private readonly PdfMetadataReader? purePdfMetadataReader;
 
     /// <summary>
     /// Constructor that processes and extracts metadata from the given file name.
