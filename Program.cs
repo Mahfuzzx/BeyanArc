@@ -1,5 +1,6 @@
 ﻿
 using BeyanArc;
+using System.Globalization;
 using System.Text.Json;
 
 Settings settings = new();
@@ -25,7 +26,7 @@ string[] files = Directory.GetFiles(settings.sourcePath, "*.pdf");
 
 foreach (string file in files)
 {
-    BFile bFile = new(Path.GetFileName(file));
+    BFile bFile = new(file);
     //PdfMetadataReader pdfMetadata;
     Console.Write($"{file} dosyası");
     if (bFile.type == "UNKNOWN") Console.WriteLine(" tanımsız.");
@@ -34,7 +35,7 @@ foreach (string file in files)
         var destPath = (bFile.type == "TAX" ? settings.taxPath : settings.sgkPath) + bFile.destPath;
         var destFile = $"{destPath}\\{bFile.destFileName}.pdf";
         //pdfMetadata = new(file);
-        moveFile(file, destFile);
+        //moveFile(file, destFile);
         /*Console.WriteLine("PDF Metadata:");
         foreach (var kvp in pdfMetadata.metadata)
         {
@@ -142,6 +143,8 @@ class BFile
     /// Type of the file, either "TAX" or "SGK"
     /// </summary>
     public readonly string type;
+    public readonly DateTime creationTime;
+
     private readonly string? customerName;
     private readonly int beginYear;
     private readonly int beginMonth;
@@ -154,6 +157,7 @@ class BFile
     private readonly string? fileType;
     private readonly string[] months = ["OCAK", "SUBAT", "MART", "NISAN", "MAYIS", "HAZIRAN",
                                         "TEMMUZ", "AGUSTOS", "EYLUL", "EKIM", "KASIM", "ARALIK"];
+    private readonly PdfMetadataReader? pdfMetadataReader;
 
     /// <summary>
     /// Constructor that processes and extracts metadata from the given file name.
@@ -163,8 +167,19 @@ class BFile
     {
         try
         {
-            string[] parts = file.Split('_');
+            string[] parts = Path.GetFileName(file).Split('_');
             if (parts.Length != 8) throw new Exception();
+            pdfMetadataReader = new(file);
+            string dateString = pdfMetadataReader.metadata["CreationDate"];
+            dateString = dateString[2..];
+            dateString = dateString[..(dateString.Length - 1)].Replace("'", ":");
+
+            // Define the date format
+            string format = "yyyyMMddHHmmssK";
+
+            // Parse the date string
+            DateTime dateTime = DateTime.ParseExact(dateString, format, CultureInfo.InvariantCulture);
+            creationTime = dateTime;
             type = parts[2].Length > 9 ? "TAX" : "SGK";
             if (type == "TAX")
             {
