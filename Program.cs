@@ -4,29 +4,21 @@ using System.Text.Json;
 
 Settings settings = new();
 
-if (args.Length == 1 && args.Contains("-s")) LoadSettings();
+if (args.Length == 0 && File.Exists("settings.json")) LoadSettings();
 else if (args.Length < 3)
 {
-    Console.WriteLine("Kullanım: BeyanArc.exe [-s] [Kaynak VergiHedef SGKHedef] [--o] [--c] [--k]");
+    Console.WriteLine("Kullanım: BeyanArc.exe [Kaynak VergiHedef SGKHedef] [--o] [--c] [--k] [--s]");
     Environment.Exit(1);
-}
-
-settings.overwrite = args.Contains("--o");
-settings.copyMode = args.Contains("--c");
-settings.keepBoth = args.Contains("--k");
-
-if (args[0].Equals("-s", StringComparison.CurrentCultureIgnoreCase))
-{
-    settings.sourcePath = args[1];
-    settings.taxPath = addSlash(args[2]);
-    settings.sgkPath = addSlash(args[3]);
-    SaveSettings();
 }
 else
 {
     settings.sourcePath = args[0];
     settings.taxPath = addSlash(args[1]);
     settings.sgkPath = addSlash(args[2]);
+    settings.overwrite = args.Contains("--o");
+    settings.copyMode = args.Contains("--c");
+    settings.keepBoth = args.Contains("--k");
+    if (args.Contains("--s")) SaveSettings();
 }
 
 string[] files = Directory.GetFiles(settings.sourcePath, "*.pdf");
