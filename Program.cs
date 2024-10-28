@@ -6,16 +6,18 @@ Settings settings = new();
 if (args.Length == 1 && args.Contains("-s")) LoadSettings();
 else if (args.Length < 3)
 {
-    Console.WriteLine("Kullanım: BeyanArc.exe [-s] [Kaynak VergiHedef SGKHedef] [--üstüneyaz]");
+    Console.WriteLine("Kullanım: BeyanArc.exe [-s] [Kaynak VergiHedef SGKHedef] [--o] [--c]");
     Environment.Exit(1);
 }
+
+settings.overwrite = args.Contains("--o");
+settings.copyMode = args.Contains("--c");
 
 if (args[0].Equals("-s", StringComparison.CurrentCultureIgnoreCase))
 {
     settings.sourcePath = args[1];
     settings.taxPath = addSlash(args[2]);
     settings.sgkPath = addSlash(args[3]);
-    settings.overwrite = args.Contains("--üstüneyaz");
     SaveSettings();
 }
 else
@@ -58,7 +60,8 @@ void moveFile(string sourceFile, string destFile)
         }
 
         if (File.Exists(destFile) && settings.overwrite) File.Delete(destFile);
-        File.Move(sourceFile, destFile);
+        if (!settings.copyMode) File.Move(sourceFile, destFile);
+        else File.Copy(sourceFile, destFile);
     }
     catch (Exception ex)
     {
@@ -118,6 +121,7 @@ class Settings
     /// </summary>
     public string sgkPath { get; set; } = "";
     public bool overwrite { get; set; } = false;
+    public bool copyMode { get; set; } = false;
 }
 
 /// <summary>
