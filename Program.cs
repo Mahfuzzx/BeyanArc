@@ -1,4 +1,5 @@
 ﻿
+using BeyanArc;
 using System.Text.Json;
 
 Settings settings = new();
@@ -6,12 +7,13 @@ Settings settings = new();
 if (args.Length == 1 && args.Contains("-s")) LoadSettings();
 else if (args.Length < 3)
 {
-    Console.WriteLine("Kullanım: BeyanArc.exe [-s] [Kaynak VergiHedef SGKHedef] [--o] [--c]");
+    Console.WriteLine("Kullanım: BeyanArc.exe [-s] [Kaynak VergiHedef SGKHedef] [--o] [--c] [--k]");
     Environment.Exit(1);
 }
 
 settings.overwrite = args.Contains("--o");
 settings.copyMode = args.Contains("--c");
+settings.keepBoth = args.Contains("--k");
 
 if (args[0].Equals("-s", StringComparison.CurrentCultureIgnoreCase))
 {
@@ -60,8 +62,7 @@ void moveFile(string sourceFile, string destFile)
         }
 
         if (File.Exists(destFile) && settings.overwrite) File.Delete(destFile);
-        if (!settings.copyMode) File.Move(sourceFile, destFile);
-        else File.Copy(sourceFile, destFile);
+        FileMover.moveFileIfNotIdentical(sourceFile, destFile, settings.copyMode);
     }
     catch (Exception ex)
     {
@@ -122,6 +123,7 @@ class Settings
     public string sgkPath { get; set; } = "";
     public bool overwrite { get; set; } = false;
     public bool copyMode { get; set; } = false;
+    public bool keepBoth { get; set; } = false;
 }
 
 /// <summary>
