@@ -5,10 +5,11 @@ namespace BeyanArc
 {
     public class FileMover
     {
-        public static void moveFileIfNotIdentical(string sourceFilePath, string targetDirectory, bool copy = false)
+        public static void moveFileIfNotIdentical(string sourceFilePath, string targetFilePath, bool copy = false)
         {
-            string fileName = Path.GetFileName(sourceFilePath);
-            string targetFilePath = Path.Combine(targetDirectory, fileName);
+            //string fileName = Path.GetFileName(sourceFilePath);
+            //string targetFilePath = Path.Combine(targetDirectory, fileName);
+            string targetDirectory = Path.GetDirectoryName(targetFilePath) ?? "";
 
             // Check if a file with the same name already exists in the target directory
             if (File.Exists(targetFilePath))
@@ -26,7 +27,7 @@ namespace BeyanArc
 
                     // Rename source and target files with their respective modified date
                     string newSourceFilePath = Path.Combine(Path.GetDirectoryName(sourceFilePath) ?? "",
-                                                            $"{Path.GetFileNameWithoutExtension(sourceFilePath)}_{sourceModifiedDate}{Path.GetExtension(sourceFilePath)}");
+                                                            $"{Path.GetFileNameWithoutExtension(targetFilePath)}_{sourceModifiedDate}{Path.GetExtension(sourceFilePath)}");
 
                     string newTargetFilePath = Path.Combine(targetDirectory,
                                                             $"{Path.GetFileNameWithoutExtension(targetFilePath)}_{targetModifiedDate}{Path.GetExtension(targetFilePath)}");
