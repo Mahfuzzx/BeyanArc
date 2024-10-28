@@ -161,7 +161,7 @@ class BFile
         try
         {
             string[] parts = Path.GetFileName(file).Split('_');
-            if (parts.Length != 8) throw new Exception();
+            if (parts.Length < 7) throw new Exception();
             purePdfMetadataReader = new(file);
             string dateString = purePdfMetadataReader.metaData["CreationDate"]; //purePdfMetadataReader.readMetadata("CreationDate");
             dateString = dateString[(dateString.IndexOf("D:") + 2)..];
