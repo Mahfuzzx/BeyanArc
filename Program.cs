@@ -27,20 +27,13 @@ string[] files = Directory.GetFiles(settings.sourcePath, "*.pdf");
 foreach (string file in files)
 {
     BFile bFile = new(file);
-    //PdfMetadataReader pdfMetadata;
     Console.Write($"{file} dosyası");
     if (bFile.type == "UNKNOWN") Console.WriteLine(" tanımsız.");
     else
     {
         var destPath = (bFile.type == "TAX" ? settings.taxPath : settings.sgkPath) + bFile.destPath;
         var destFile = $"{destPath}\\{bFile.destFileName}.pdf";
-        //pdfMetadata = new(file);
-        //moveFile(file, destFile);
-        /*Console.WriteLine("PDF Metadata:");
-        foreach (var kvp in pdfMetadata.metadata)
-        {
-            Console.WriteLine($"{kvp.Key}: {kvp.Value}\n");
-        }*/
+        moveFile(file, destFile);
         Console.WriteLine($"\n{destFile} hedefine taşındı.");
     }
 }
@@ -62,7 +55,7 @@ void moveFile(string sourceFile, string destFile)
         }
 
         if (File.Exists(destFile) && settings.overwrite) File.Delete(destFile);
-        FileMover.moveFileIfNotIdentical(sourceFile, destFile, settings.copyMode);
+        //FileMover.moveFileIfNotIdentical(sourceFile, destFile, settings.copyMode);
     }
     catch (Exception ex)
     {
@@ -158,6 +151,7 @@ class BFile
     private readonly string[] months = ["OCAK", "SUBAT", "MART", "NISAN", "MAYIS", "HAZIRAN",
                                         "TEMMUZ", "AGUSTOS", "EYLUL", "EKIM", "KASIM", "ARALIK"];
     private readonly PdfMetadataReader? pdfMetadataReader;
+    private readonly BeyanArc.Pure.PdfMetadataReader? purePdfMetadataReader;
 
     /// <summary>
     /// Constructor that processes and extracts metadata from the given file name.
@@ -170,8 +164,10 @@ class BFile
             string[] parts = Path.GetFileName(file).Split('_');
             if (parts.Length != 8) throw new Exception();
             pdfMetadataReader = new(file);
-            string dateString = pdfMetadataReader.metadata["CreationDate"];
-            dateString = dateString[2..];
+            purePdfMetadataReader = new(file);
+            //string dateString = pdfMetadataReader.metadata["CreationDate"];
+            string dateString = purePdfMetadataReader.readMetadata("CreationDate");
+            dateString = dateString[(dateString.IndexOf("D:") + 2)..];
             dateString = dateString[..(dateString.Length - 1)].Replace("'", ":");
 
             // Define the date format

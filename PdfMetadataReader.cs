@@ -1,7 +1,58 @@
 ﻿using iTextSharp.text.pdf;
+using System.Text.RegularExpressions;
 
 namespace BeyanArc
 {
+    namespace Pure
+    {
+        public partial class PdfMetadataReader(string filePath)
+        {
+            private readonly string _filePath = filePath;
+            [GeneratedRegex("/ModDate(.*?)>>", RegexOptions.Singleline)]
+            private static partial Regex myRegex();
+
+            public string readMetadata(string key)
+            {
+                try
+                {
+                    using var reader = new BinaryReader(File.Open(_filePath, FileMode.Open));
+                    // Read the PDF file until we find the /Info section
+                    string fileContent = readAllText(reader);
+                    var infoMatch = myRegex().Match(fileContent);
+
+                    if (infoMatch.Success)
+                    {
+                        string infoContent = infoMatch.Groups[1].Value;
+
+                        // Extract individual metadata fields
+                        return extractField(infoContent, $"/{key}");
+                    }
+                    else
+                    {
+                        throw new Exception("No metadata found.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Error reading PDF: {ex.Message}");
+                }
+            }
+
+            private static string readAllText(BinaryReader reader)
+            {
+                using var memoryStream = new MemoryStream();
+                reader.BaseStream.CopyTo(memoryStream);
+                return System.Text.Encoding.UTF8.GetString(memoryStream.ToArray());
+            }
+
+            private static string extractField(string content, string fieldName)
+            {
+                var match = Regex.Match(content, $"{fieldName}\\s+\\((.*?)\\)", RegexOptions.Singleline);
+                return match.Success ? $"{fieldName}: {match.Groups[1].Value}" : $"{fieldName}: N/A";
+            }
+        }
+    }
+
     public class PdfMetadataReader
     {
         private readonly string _filePath;
