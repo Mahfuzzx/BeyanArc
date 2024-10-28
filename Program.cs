@@ -26,14 +26,21 @@ string[] files = Directory.GetFiles(settings.sourcePath, "*.pdf");
 foreach (string file in files)
 {
     BFile bFile = new(Path.GetFileName(file));
+    PdfMetadataReader pdfMetadata;
     Console.Write($"{file} dosyası");
     if (bFile.type == "UNKNOWN") Console.WriteLine(" tanımsız.");
     else
     {
         var destPath = (bFile.type == "TAX" ? settings.taxPath : settings.sgkPath) + bFile.destPath;
         var destFile = $"{destPath}\\{bFile.destFileName}.pdf";
-        moveFile(file, destFile);
-        Console.WriteLine($"\n{destFile} hedefine taşındı.");
+        pdfMetadata = new(file);
+        //moveFile(file, destFile);
+        Console.WriteLine("PDF Metadata:");
+        foreach (var kvp in pdfMetadata.metadata)
+        {
+            Console.WriteLine($"{kvp.Key}: {kvp.Value}\n");
+        }
+        //Console.WriteLine($"\n{destFile} hedefine taşındı.");
     }
 }
 
