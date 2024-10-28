@@ -6,7 +6,7 @@ Settings settings = new();
 if (args.Length == 1 && args.Contains("-s")) LoadSettings();
 else if (args.Length < 3)
 {
-    Console.WriteLine("Kullanım: BeyanArc.exe [-s] [Kaynak VergiHedef SGKHedef]");
+    Console.WriteLine("Kullanım: BeyanArc.exe [-s] [Kaynak VergiHedef SGKHedef] [--üstüneyaz]");
     Environment.Exit(1);
 }
 
@@ -15,6 +15,7 @@ if (args[0].Equals("-s", StringComparison.CurrentCultureIgnoreCase))
     settings.sourcePath = args[1];
     settings.taxPath = addSlash(args[2]);
     settings.sgkPath = addSlash(args[3]);
+    settings.overwrite = args.Contains("--üstüneyaz");
     SaveSettings();
 }
 else
@@ -56,6 +57,7 @@ void moveFile(string sourceFile, string destFile)
             Directory.CreateDirectory(destDir);
         }
 
+        if (File.Exists(destFile) && settings.overwrite) File.Delete(destFile);
         File.Move(sourceFile, destFile);
     }
     catch (Exception ex)
@@ -115,6 +117,7 @@ class Settings
     /// Path to the directory where SGK files will be moved.
     /// </summary>
     public string sgkPath { get; set; } = "";
+    public bool overwrite { get; set; } = false;
 }
 
 /// <summary>
