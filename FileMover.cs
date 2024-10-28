@@ -16,7 +16,6 @@ namespace BeyanArc
             {
                 if (areFilesIdentical(sourceFilePath, targetFilePath))
                 {
-                    Console.WriteLine("Files are identical, no need to move.");
                     return;
                 }
                 else
@@ -38,7 +37,6 @@ namespace BeyanArc
                     // Move the renamed source file to the target directory
                     if (copy) File.Copy(newSourceFilePath, Path.Combine(targetDirectory, Path.GetFileName(newSourceFilePath)));
                     else File.Move(newSourceFilePath, Path.Combine(targetDirectory, Path.GetFileName(newSourceFilePath)));
-                    Console.WriteLine("Files were not identical. Renamed and moved the file.");
                 }
             }
             else
@@ -46,7 +44,6 @@ namespace BeyanArc
                 // If no conflict, just move the file
                 if (copy) File.Move(sourceFilePath, targetFilePath);
                 else File.Move(sourceFilePath, targetFilePath);
-                Console.WriteLine("File moved successfully.");
             }
         }
 
