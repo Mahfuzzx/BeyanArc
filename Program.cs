@@ -1,6 +1,4 @@
-﻿
-using BeyanArc;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 
 Settings settings = new();
@@ -56,6 +54,8 @@ void moveFile(string sourceFile, string destFile)
 
         if (File.Exists(destFile) && settings.overwrite) File.Delete(destFile);
         //FileMover.moveFileIfNotIdentical(sourceFile, destFile, settings.copyMode);
+        if (settings.copyMode) File.Copy(sourceFile, destFile);
+        else File.Move(sourceFile, destFile);
     }
     catch (Exception ex)
     {
@@ -150,7 +150,6 @@ class BFile
     private readonly string? fileType;
     private readonly string[] months = ["OCAK", "SUBAT", "MART", "NISAN", "MAYIS", "HAZIRAN",
                                         "TEMMUZ", "AGUSTOS", "EYLUL", "EKIM", "KASIM", "ARALIK"];
-    private readonly PdfMetadataReader? pdfMetadataReader;
     private readonly BeyanArc.Pure.PdfMetadataReader? purePdfMetadataReader;
 
     /// <summary>
@@ -163,10 +162,8 @@ class BFile
         {
             string[] parts = Path.GetFileName(file).Split('_');
             if (parts.Length != 8) throw new Exception();
-            pdfMetadataReader = new(file);
             purePdfMetadataReader = new(file);
-            //string dateString = pdfMetadataReader.metadata["CreationDate"];
-            string dateString = purePdfMetadataReader.readMetadata("CreationDate");
+            string dateString = purePdfMetadataReader.metaData["CreationDate"]; //purePdfMetadataReader.readMetadata("CreationDate");
             dateString = dateString[(dateString.IndexOf("D:") + 2)..];
             dateString = dateString[..(dateString.Length - 1)].Replace("'", ":");
 
@@ -217,7 +214,7 @@ class BFile
             };
             if (fileType == "UNKNOWN") throw new Exception();
             periodString = calcPeriod(beginMonth, endMonth) + "_" + (endMonth == beginMonth ? months[endMonth - 1] : "DONEM");
-            destFileName = $"{periodString}_{destFileName}_{fileType}";
+            destFileName = $"{periodString}_{destFileName}_{fileType}_{creationTime:yyyyMMddHHmmss}";
         }
         catch (Exception)
         {
