@@ -3,8 +3,17 @@ using System.Security.Cryptography;
 
 namespace BeyanArc
 {
+    /// <summary>
+    /// Provides functionality to move or copy files if they are not identical.
+    /// </summary>
     public class FileMover
     {
+        /// <summary>
+        /// Moves or copies a file to the target path if the file at the target path is not identical to the source file.
+        /// </summary>
+        /// <param name="sourceFilePath">The path of the source file.</param>
+        /// <param name="targetFilePath">The path of the target file.</param>
+        /// <param name="copy">If true, the file will be copied instead of moved.</param>
         public static void moveFileIfNotIdentical(string sourceFilePath, string targetFilePath, bool copy = false)
         {
             //string fileName = Path.GetFileName(sourceFilePath);
@@ -47,6 +56,12 @@ namespace BeyanArc
             }
         }
 
+        /// <summary>
+        /// Determines if two files are identical by comparing their sizes and SHA256 hashes.
+        /// </summary>
+        /// <param name="filePath1">The path of the first file.</param>
+        /// <param name="filePath2">The path of the second file.</param>
+        /// <returns>True if the files are identical, otherwise false.</returns>
         private static bool areFilesIdentical(string filePath1, string filePath2)
         {
             var fileInfo1 = new FileInfo(filePath1);
@@ -62,6 +77,12 @@ namespace BeyanArc
             return StructuralComparisons.StructuralEqualityComparer.Equals(hash1, hash2);
         }
 
+        /// <summary>
+        /// Computes the SHA256 hash of a file.
+        /// </summary>
+        /// <param name="hashAlgorithm">The hash algorithm to use.</param>
+        /// <param name="filePath">The path of the file.</param>
+        /// <returns>The SHA256 hash of the file as a byte array.</returns>
         private static byte[] getFileHash(HashAlgorithm hashAlgorithm, string filePath)
         {
             using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
