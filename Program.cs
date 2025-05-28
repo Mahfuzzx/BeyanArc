@@ -3,7 +3,15 @@
 if (args.Length == 0 && File.Exists("settings.json")) Settings.load();
 else if (args.Length < 3)
 {
-    Console.WriteLine("Kullanım: BeyanArc.exe [Kaynak VergiHedef SGKHedef] [--o] [--c] [--k] [--s]");
+    Console.WriteLine("Kullanım: BeyanArc.exe Kaynak VergiHedef SGKHedef [--o] [--c] [--s]");
+    Console.WriteLine("Kaynak: PDF dosyalarının bulunduğu dizin");
+    Console.WriteLine("Vergi Hedef: Vergi dosyalarının taşınacağı dizin");
+    Console.WriteLine("SGK Hedef: SGK dosyalarının taşınacağı dizin");
+    Console.WriteLine("--o: Üstüne yazma modu");
+    Console.WriteLine("--c: Kopyalama modu");
+    //Console.WriteLine("--k: Her iki dosyayı da taşır");
+    Console.WriteLine("--s: Ayarları kaydeder");
+    Console.WriteLine("Örnek: C:\\Downloads C:\\BEYANNAMELER C:\\SGK --o");
     Environment.Exit(1);
 }
 else

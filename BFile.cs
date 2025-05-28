@@ -44,7 +44,7 @@ namespace BeyanArc
         {
             try
             {
-                string[] parts = Path.GetFileName(file).Split('_');
+                string[] parts = Path.GetFileNameWithoutExtension(file).Split('_');
                 if (parts.Length < 7) throw new Exception();
                 purePdfMetadataReader = new(file);
                 string dateString = purePdfMetadataReader.metaData["CreationDate"]; //purePdfMetadataReader.readMetadata("CreationDate");
