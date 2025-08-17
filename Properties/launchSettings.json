@@ -1,8 +1,7 @@
 {
   "profiles": {
     "BeyanArc": {
-      "commandName": "Project",
-      "commandLineArgs": "D:\\INDIRILEN \\\\Halil1\\BEYANNAMELER\\LUCA \\\\Halil1\\BEYANNAMELER\\SGK --k --s"
+      "commandName": "Project"
     }
   }
 }

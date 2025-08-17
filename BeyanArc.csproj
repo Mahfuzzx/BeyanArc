@@ -9,6 +9,12 @@
 
   <ItemGroup>
     <Compile Remove="FileMover.cs" />
+    <Compile Remove="JSONHelper.cs" />
+    <Compile Remove="StringOperationsHelper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PdfPig" Version="0.1.11" />
   </ItemGroup>
 
 </Project>

@@ -11,11 +11,11 @@ namespace BeyanArc
         /// <summary>
         /// Destination path based on file type and content
         /// </summary>
-        public readonly string? destPath;
+        public readonly string destPath = "";
         /// <summary>
         /// Generated file name after processing
         /// </summary>
-        public readonly string? destFileName;
+        public readonly string destFileName = "";
         /// <summary>
         /// Type of the file, either "TAX" or "SGK"
         /// </summary>
@@ -32,8 +32,7 @@ namespace BeyanArc
         private readonly string? periodString;
         private readonly string? sgkType;
         private readonly string? fileType;
-        private readonly string[] months = ["OCAK", "SUBAT", "MART", "NISAN", "MAYIS", "HAZIRAN",
-                                        "TEMMUZ", "AGUSTOS", "EYLUL", "EKIM", "KASIM", "ARALIK"];
+        private readonly string[] months = ["OCAK", "SUBAT", "MART", "NISAN", "MAYIS", "HAZIRAN", "TEMMUZ", "AGUSTOS", "EYLUL", "EKIM", "KASIM", "ARALIK"];
         private readonly PdfMetadataReader? purePdfMetadataReader;
 
         /// <summary>
@@ -45,18 +44,15 @@ namespace BeyanArc
             try
             {
                 string[] parts = Path.GetFileName(file).Split('_');
+
                 if (parts.Length < 7) throw new Exception();
+
                 purePdfMetadataReader = new(file);
-                string dateString = purePdfMetadataReader.metaData["CreationDate"]; //purePdfMetadataReader.readMetadata("CreationDate");
+                string dateString = purePdfMetadataReader.metaData["CreationDate"];
                 dateString = dateString[(dateString.IndexOf("D:") + 2)..];
                 dateString = dateString[..(dateString.Length - 1)].Replace("'", ":");
+                creationTime = DateTime.ParseExact(dateString, "yyyyMMddHHmmssK", CultureInfo.InvariantCulture);
 
-                // Define the date format
-                string format = "yyyyMMddHHmmssK";
-
-                // Parse the date string
-                DateTime dateTime = DateTime.ParseExact(dateString, format, CultureInfo.InvariantCulture);
-                creationTime = dateTime;
                 type = parts[2].Length > 9 ? "TAX" : "SGK";
                 if (type == "TAX")
                 {
@@ -97,8 +93,8 @@ namespace BeyanArc
                     _ => "UNKNOWN",
                 };
                 if (fileType == "UNKNOWN") throw new Exception();
-                periodString = calcPeriod(beginMonth, endMonth) + "_" + (endMonth == beginMonth ? months[endMonth - 1] : "DONEM");
-                destFileName = $"{periodString}_{destFileName}_{fileType}_{creationTime:yyyyMMddHHmmss}";
+                periodString = $"{calcPeriod(beginMonth, endMonth)}_{(endMonth == beginMonth ? months[endMonth - 1] : "DONEM")}";
+                destFileName = $"{periodString}_{destFileName}_{fileType}_{creationTime:yyyyMMdd_HHmmss}.pdf";
             }
             catch (Exception)
             {
@@ -113,10 +109,7 @@ namespace BeyanArc
         /// <param name="beginMonth">The beginning month of the period.</param>
         /// <param name="endMonth">The ending month of the period.</param>
         /// <returns>A string representing the period, padded with zeros if needed.</returns>
-        private static string calcPeriod(int beginMonth, int endMonth)
-        {
-            return (endMonth / (endMonth - beginMonth + 1)).ToString().PadLeft(2, '0');
-        }
+        private static string calcPeriod(int beginMonth, int endMonth) => (endMonth / (endMonth - beginMonth + 1)).ToString().PadLeft(2, '0');
 
         /// <summary>
         /// Replaces special characters (Turkish letters) in the given string.
@@ -126,21 +119,12 @@ namespace BeyanArc
         /// <returns>A string with filtered characters.</returns>
         private static string filterChars(string srcString, bool onlySpace = false)
         {
-            Dictionary<char, char> charMap = new()
-    {
-        { ' ', '_' }, { 'Ğ', 'G' }, { 'Ü', 'U' }, { 'Ş', 'S' },
-        { 'İ', '_' }, { 'Ö', 'O' }, { 'Ç', 'C' }
-    };
+            Dictionary<char, char> charMap = new() { { ' ', '_' }, { 'Ğ', 'G' }, { 'Ü', 'U' }, { 'Ş', 'S' }, { 'İ', '_' }, { 'Ö', 'O' }, { 'Ç', 'C' } };
 
-            if (onlySpace)
-            {
-                return srcString.Replace(' ', '_');
-            }
+            if (onlySpace) return srcString.Replace(' ', '_');
 
-            foreach (var pair in charMap)
-            {
-                srcString = srcString.Replace(pair.Key, pair.Value);
-            }
+            foreach (var pair in charMap) srcString = srcString.Replace(pair.Key, pair.Value);
+
             return srcString;
         }
     }

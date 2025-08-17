@@ -11,28 +11,15 @@ namespace BeyanArc
             public string sgkPath { get; set; } = "";
             public bool overwrite { get; set; } = false;
             public bool copyMode { get; set; } = false;
-            public bool keepBoth { get; set; } = false;
-
         }
         private static SettingsJSON settingsJSON = new();
-        /// <summary>
-        /// Path to the source directory containing the PDF files.
-        /// </summary>
+
         public static string sourcePath { get => settingsJSON.sourcePath; set { settingsJSON.sourcePath = value; } }
-        /// <summary>
-        /// Path to the directory where tax files will be moved.
-        /// </summary>
         public static string taxPath { get => settingsJSON.taxPath; set { settingsJSON.taxPath = value; } }
-        /// <summary>
-        /// Path to the directory where SGK files will be moved.
-        /// </summary>
         public static string sgkPath { get => settingsJSON.sgkPath; set { settingsJSON.sgkPath = value; } }
-        public static bool overwrite { get; set; } = false;
-        public static bool copyMode { get; set; } = false;
-        public static bool keepBoth { get; set; } = false;
-        /// <summary>
-        /// Loads settings from the 'settings.json' file or creates a new Settings instance.
-        /// </summary>
+        public static bool overwrite { get => settingsJSON.overwrite; set { settingsJSON.overwrite = value; } }
+        public static bool copyMode { get => settingsJSON.copyMode; set { settingsJSON.copyMode = value; } }
+
         public static void load()
         {
             var settingsFile = "settings.json";
@@ -44,9 +31,6 @@ namespace BeyanArc
             }
         }
 
-        /// <summary>
-        /// Saves the current settings to the 'settings.json' file.
-        /// </summary>
         public static void save()
         {
             var jsonString = JsonSerializer.Serialize(settingsJSON);
