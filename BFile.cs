@@ -44,7 +44,6 @@ namespace BeyanArc
             try
             {
                 string[] parts = Path.GetFileName(file).Split('_');
-
                 if (parts.Length < 7) throw new Exception();
 
                 purePdfMetadataReader = new(file);

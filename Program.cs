@@ -4,7 +4,7 @@
 if (args.Length == 0 && File.Exists("settings.json")) Settings.load();
 else if (args.Length < 3)
 {
-    Console.WriteLine("Kullanım: BeyanArc.exe [Kaynak VergiHedef SGKHedef] [--o] [--c] [--s]");
+    Console.WriteLine("Kullanım: BeyanArc.exe [Kaynak VergiHedef SGKHedef] [--o] [--c] [--k] [--s]");
     Environment.Exit(1);
 }
 else
